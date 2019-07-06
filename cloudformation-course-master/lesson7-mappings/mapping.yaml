@@ -1,0 +1,49 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Sample Template that demonstrates mapping feature using the YAML language'
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  OSType:
+    Type: String
+    Default: linux
+    AllowedValues: 
+      - linux
+      - windows
+
+      
+Mappings:
+  
+  RegionToAMI:
+    us-east-1:
+      linux: ami-0080e4c5bc078760e
+      windows: ami-07a29e78aeb420471
+
+    us-west-2:
+      linux: ami-01e24be29428c15b2
+      windows: ami-0120697141ba7b40d
+    
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+  
+      KeyName:
+        Ref: KeyName
+      ImageId:
+        !FindInMap
+        - RegionToAMI
+        - !Ref AWS::Region
+        - !Ref OSType
+        
+
+
+Outputs:
+
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value:
+      !GetAtt EC2Instance.PublicIp
